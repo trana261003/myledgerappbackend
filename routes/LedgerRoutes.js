@@ -79,6 +79,35 @@ router.post('/ledger', async (req, res) => {
 });
 
 
+// Update single entry inside a ledger
+router.put('/ledger/update-entry/:ledgerId/:entryId', async (req, res) => {
+  try {
+    const { ledgerId, entryId } = req.params;
+    const { date, amount } = req.body;
+
+    const ledger = await Ledger.findById(ledgerId);
+    if (!ledger) return res.status(404).json({ error: 'Ledger not found' });
+
+    const entry = ledger.entries.id(entryId);
+    if (!entry) return res.status(404).json({ error: 'Entry not found' });
+
+    // Update fields
+    entry.date = date;
+    entry.amount = amount;
+
+    // Recalculate total
+    ledger.total = ledger.entries.reduce((sum, e) => sum + e.amount, 0);
+
+    await ledger.save();
+    res.json({ message: 'Entry updated successfully' });
+
+  } catch (err) {
+    console.error("Update error:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
 
 
 // GET: Balance Sheet by year
