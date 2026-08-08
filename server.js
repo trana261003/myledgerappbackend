@@ -21,6 +21,12 @@ mongoose.connect(process.env.MONGO_URI)
     process.exit(1);
   });
 
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    status: "healthy",
+    message: "Server is running"
+  });
+});
 app.use("/auth", require("./routes/authRoutes"));
 app.use('/api', ledgerRoutes);
 
